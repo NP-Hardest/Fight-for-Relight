@@ -2,8 +2,6 @@ import numpy as np
 from PIL import Image
 import matplotlib.pyplot as plt
 
-def load_hdr_image(path):
-    return np.array(imageio.imread(path)).astype(np.float32)
 
 def load_image(path):
     img = Image.open(path)
@@ -30,7 +28,7 @@ def normalize(v):
 def reflect(incident, normal):
     return incident - 2 * np.sum(incident * normal, axis=-1, keepdims=True) * normal
 
-def relight_with_specular_map(albedo_path, normal_path, specular_map_path, output_path, roughness_map_path, alpha_path):
+def relight(albedo_path, normal_path, specular_map_path, output_path, roughness_map_path, alpha_path):
     albedo_srgb = load_image(albedo_path)
     if albedo_srgb.shape[-1] == 4:
         albedo_srgb = albedo_srgb[..., :3]
@@ -52,15 +50,15 @@ def relight_with_specular_map(albedo_path, normal_path, specular_map_path, outpu
     lights = [
         {
             'type': 'directional',
-            'direction': normalize(np.array([-0.7, -0.7, 0.0])),  # top-left direction
-            'color': np.array([0, 1, 0]),
-            'intensity': 2
+            'direction': normalize(np.array([-0.7, 0.7, 0.5])),  # top-left direction
+            'color': np.array([1, 1, 1]),
+            'intensity': 1
         },
         {
             'type': 'directional',
             'direction': normalize(np.array([0.7, 0.7, 0.5])),  # top-right direction
-            'color': np.array([1, 1, 1]),
-            'intensity': 0
+            'color': np.array([0, 1, 0]),
+            'intensity': 1
         }
     ]
     
@@ -98,7 +96,6 @@ def relight_with_specular_map(albedo_path, normal_path, specular_map_path, outpu
             for light in lights:
                 l_dir = light['direction']
                 ndotl = max(np.dot(normal_pixel, l_dir), 0.0)
-                diffuse += ndotl * light['intensity'] * light['color']
 
 
                 ndotl = max(np.dot(normal_pixel, l_dir), 0.0)
@@ -119,6 +116,8 @@ def relight_with_specular_map(albedo_path, normal_path, specular_map_path, outpu
                 G_L = ndotl / (ndotl * (1 - k) + k) if ndotl > 0 else 0.0
                 G = G_V * G_L
 
+                # diffuse += ndotl * light['intensity'] * light['color']
+                diffuse += ndotl * (1 - F) * light['intensity'] * light['color']
                 spec = (D * F * G) / (4 * ndotv * ndotl + 0.001)
                 specular += spec * light['color'] * light['intensity']
 
@@ -130,7 +129,7 @@ def relight_with_specular_map(albedo_path, normal_path, specular_map_path, outpu
     result_srgb = linear_to_srgb(result)
     save_image(result_srgb, output_path)           
 
-relight_with_specular_map(
+relight(
     albedo_path="inputs/albedo.png",
     normal_path="inputs/normal.png",
     specular_map_path="inputs/specular.png",
