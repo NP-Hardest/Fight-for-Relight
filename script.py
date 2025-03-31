@@ -131,10 +131,10 @@ def relight_with_specular_map(albedo_path, normal_path, specular_map_path, outpu
     save_image(result_srgb, output_path)           
 
 relight_with_specular_map(
-    albedo_path="results/albedo.png",
-    normal_path="results/normal.png",
-    specular_map_path="results/specular.png",
-    roughness_map_path="results/roughness.png",
-    alpha_path="results/alpha.png",
+    albedo_path="inputs/albedo.png",
+    normal_path="inputs/normal.png",
+    specular_map_path="inputs/specular.png",
+    roughness_map_path="inputs/roughness.png",
+    alpha_path="inputs/alpha.png",
     output_path="output.png"
 )
