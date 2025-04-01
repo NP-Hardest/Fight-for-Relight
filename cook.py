@@ -135,5 +135,5 @@ relight(
     specular_map_path="inputs/specular.png",
     roughness_map_path="inputs/roughness.png",
     alpha_path="inputs/alpha.png",
-    output_path="output.png"
+    output_path="output_cook.png"
 )
